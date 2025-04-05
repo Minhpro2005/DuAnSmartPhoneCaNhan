@@ -47,6 +47,7 @@ public class UsersService {
             existingUser.setSdt(updatedUser.getSdt());
             existingUser.setVaiTro(updatedUser.getVaiTro());
             existingUser.setTrangThai(updatedUser.isTrangThai());
+            existingUser.setAvatar(updatedUser.getAvatar());
             return usersRepository.save(existingUser);
         } else {
             return null;

@@ -6,6 +6,8 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "HoaDon")
 @Data
@@ -20,7 +22,9 @@ public class HoaDon {
 
     @ManyToOne
     @JoinColumn(name = "maKH", nullable = false)
+    @JsonBackReference
     private KhachHang khachHang;
+
 
     @ManyToOne
     @JoinColumn(name = "maKM")

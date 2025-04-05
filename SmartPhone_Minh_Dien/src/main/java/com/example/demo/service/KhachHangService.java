@@ -1,7 +1,9 @@
 package com.example.demo.service;
 
 import com.example.demo.model.KhachHang;
+import com.example.demo.model.Users;
 import com.example.demo.repository.KhachHangRepository;
+import com.example.demo.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ public class KhachHangService {
 
     @Autowired
     private KhachHangRepository khachHangRepository;
+
+    @Autowired
+    private UsersRepository usersRepository;
 
     // Lấy toàn bộ khách hàng
     public List<KhachHang> getAllKhachHang() {
@@ -44,10 +49,27 @@ public class KhachHangService {
         return null;
     }
 
-    // Xoá khách hàng
+    // ✅ Xoá khách hàng và user liên kết
     public void deleteKhachHang(int id) {
-        khachHangRepository.deleteById(id);
+        Optional<KhachHang> optional = khachHangRepository.findById(id);
+        if (optional.isPresent()) {
+            KhachHang kh = optional.get();
+
+            // ✅ Nếu khách hàng có hoá đơn, kiểm tra trước (tuỳ bạn xử lý)
+
+            Users user = kh.getUser();
+
+            // ✅ Xoá khách hàng
+            khachHangRepository.delete(kh);
+
+            // ✅ Sau khi xoá KhachHang, nếu user tồn tại → xoá luôn
+            if (user != null) {
+                usersRepository.deleteById(user.getUserID());
+            }
+        }
     }
+
+
 
     // Tìm khách theo tên
     public List<KhachHang> searchByTen(String keyword) {

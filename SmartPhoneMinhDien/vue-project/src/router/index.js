@@ -13,6 +13,8 @@ import AdminLayout from '@/views/AdminLayout.vue'
 // 🔥 THÊM MỚI
 import KhachHangAdmin from '@/views/KhachHangAdmin.vue'
 import LichSuMuaHang from '@/views/LichSuMuaHang.vue'
+import Register from '@/views/Register.vue'
+import ThongTinCaNhan from '@/views/ThongTinCaNhan.vue'
 
 const routes = [
   {
@@ -26,6 +28,18 @@ const routes = [
     component: Login,
     props: true
   },
+  {
+    path: '/register', // 🔥 THÊM MỚI
+    name: 'Register',
+    component: Register
+  },
+  {
+    path: '/thongtincanhan/:id',
+    name: 'ThongTinCaNhan',
+    component: ThongTinCaNhan,
+    props: true
+  },
+  
   {
     path: '/giohang',
     name: 'Cart',

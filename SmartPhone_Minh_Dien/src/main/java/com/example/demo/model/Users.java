@@ -37,4 +37,6 @@ public class Users {
 	    private Date ngayTao = new Date(); // ✅ gán mặc định là ngày hiện tại
 
 	    private boolean trangThai;
+	    private String avatar; 
+
 }

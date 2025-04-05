@@ -1,5 +1,9 @@
 package com.example.demo.model;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,6 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class KhachHang {
 
     @Id
@@ -28,4 +33,9 @@ public class KhachHang {
     @ManyToOne
     @JoinColumn(name = "userID")
     private Users user;
+    
+    @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<HoaDon> hoaDons;
+
 }

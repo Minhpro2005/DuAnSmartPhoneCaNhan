@@ -34,11 +34,30 @@ public class NhanVien {
     @Column(unique = true)
     private String cccd;
 
-    private int vaiTro; // 1: Nhân viên, 2: Quản lý
+    private int vaiTro; 
 
     private String hinhAnh;
 
     @ManyToOne
     @JoinColumn(name = "userID")
     private Users user;
+    
+    // 👇 Lấy thông tin từ Users mà không cần DTO
+    @Transient
+    public Date getNgayTao() {
+        return user != null ? user.getNgayTao() : null;
+    }
+
+    @Transient
+    public String getAvatar() {
+        return hinhAnh;
+    }
+
+
+    @Transient
+    public int getUserID() {
+        return user != null ? user.getUserID() : 0;
+    }
+    
+    
 }

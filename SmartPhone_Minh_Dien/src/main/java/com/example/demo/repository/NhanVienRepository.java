@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
@@ -20,4 +21,6 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
 
     // Tìm theo căn cước công dân
     NhanVien findByCccd(String cccd);
+    Optional<NhanVien> findByUser_UserID(int userID);
+
 }

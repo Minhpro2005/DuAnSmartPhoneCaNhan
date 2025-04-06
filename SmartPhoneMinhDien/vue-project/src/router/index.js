@@ -15,6 +15,7 @@ import KhachHangAdmin from '@/views/KhachHangAdmin.vue'
 import LichSuMuaHang from '@/views/LichSuMuaHang.vue'
 import Register from '@/views/Register.vue'
 import ThongTinCaNhan from '@/views/ThongTinCaNhan.vue'
+import StaffAdmin from '@/views/StaffAdmin.vue'
 
 const routes = [
   {
@@ -69,6 +70,11 @@ const routes = [
         path: 'khachhang', // 🔥 THÊM
         name: 'KhachHangAdmin',
         component: KhachHangAdmin
+      },
+      {
+        path: 'nhanvien', // 🔥 THÊM
+        name: 'StaffAdmin',
+        component: StaffAdmin
       },
       {
         path: 'lichsu/:id', // 🔥 THÊM

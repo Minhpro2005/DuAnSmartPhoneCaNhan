@@ -74,18 +74,19 @@ export default {
 
         // Điều hướng theo vai trò
         switch (user.vaiTro) {
-          case 3:
-            this.$router.push('/admin');
-            break;
-          case 2:
-            this.$router.push('/employee');
-            break;
-          case 1:
-            this.$router.push('/');
-            break;
-          default:
-            this.error = 'Không xác định vai trò người dùng';
-        }
+  case 1: // Admin
+    this.$router.push('/admin');
+    break;
+  case 2: // Nhân viên
+    this.$router.push('/employee');
+    break;
+  case 3: // Khách hàng
+    this.$router.push('/');
+    break;
+  default:
+    this.error = 'Không xác định vai trò người dùng';
+}
+
 
       } catch (err) {
         console.error('Lỗi đăng nhập:', err);

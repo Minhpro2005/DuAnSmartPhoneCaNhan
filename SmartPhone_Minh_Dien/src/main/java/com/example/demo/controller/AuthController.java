@@ -27,6 +27,7 @@ public class AuthController {
     @Autowired
     private KhachHangRepository khachHangRepo;
 
+ // Đăng ký tài khoản khách hàng
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         // Kiểm tra trùng email
@@ -38,9 +39,9 @@ public class AuthController {
         Users user = Users.builder()
                 .hoTen(req.getHoTen())
                 .email(req.getEmail())
-                .matKhau(req.getMatKhau()) // 🔒 có thể mã hóa bằng BCrypt sau
+                .matKhau(req.getMatKhau()) // nên mã hoá bằng BCrypt sau
                 .sdt(req.getSdt())
-                .vaiTro(1) // 1 = Khách hàng
+                .vaiTro(3) // ✅ 3 = Khách hàng
                 .trangThai(true)
                 .ngayTao(new Date())
                 .build();
@@ -58,5 +59,6 @@ public class AuthController {
 
         return ResponseEntity.ok("Đăng ký thành công!");
     }
+
 }
 

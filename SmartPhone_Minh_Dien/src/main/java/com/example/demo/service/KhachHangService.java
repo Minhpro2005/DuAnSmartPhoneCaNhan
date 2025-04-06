@@ -28,6 +28,10 @@ public class KhachHangService {
     public Optional<KhachHang> getKhachHangById(int id) {
         return khachHangRepository.findById(id);
     }
+    
+    public Optional<KhachHang> getByUserID(int userID) {
+    	return khachHangRepository.findByUser_UserID(userID);
+    }
 
     // Thêm khách hàng mới
     public KhachHang createKhachHang(KhachHang khachHang) {

@@ -1,8 +1,11 @@
+// Updated `GioHangService.java` to validate and link KhachHang before creating a new GioHang
+
 package com.example.demo.service;
 
 import com.example.demo.model.GioHang;
 import com.example.demo.model.KhachHang;
 import com.example.demo.repository.GioHangRepository;
+import com.example.demo.repository.KhachHangRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,22 +18,32 @@ public class GioHangService {
     @Autowired
     private GioHangRepository gioHangRepository;
 
-    // ✅ Lấy tất cả giỏ hàng
+    @Autowired
+    private KhachHangRepository khachHangRepository;
+
     public List<GioHang> getAll() {
         return gioHangRepository.findAll();
     }
 
-    // ✅ Lấy giỏ hàng theo ID
     public Optional<GioHang> getById(int id) {
         return gioHangRepository.findById(id);
     }
 
-    // ✅ Thêm mới giỏ hàng
     public GioHang create(GioHang gioHang) {
+        // Kiểm tra khách hàng null
+        if (gioHang.getKhachHang() == null || gioHang.getKhachHang().getMaKH() == 0) {
+            throw new IllegalArgumentException("Khách hàng không hợp lệ");
+        }
+
+        // Load khách hàng đầy đủ từ DB
+        KhachHang kh = khachHangRepository.findById(gioHang.getKhachHang().getMaKH())
+                                          .orElseThrow(() -> new IllegalArgumentException("Khách hàng không tồn tại"));
+
+        gioHang.setKhachHang(kh);
         return gioHangRepository.save(gioHang);
     }
 
-    // ✅ Cập nhật giỏ hàng
+
     public GioHang update(int id, GioHang updated) {
         Optional<GioHang> existingOpt = gioHangRepository.findById(id);
         if (existingOpt.isPresent()) {
@@ -43,23 +56,21 @@ public class GioHangService {
         return null;
     }
 
-    // ✅ Xoá giỏ hàng
     public void delete(int id) {
         gioHangRepository.deleteById(id);
     }
 
-    // ✅ Lấy giỏ hàng theo khách hàng
     public List<GioHang> getByKhachHang(KhachHang khachHang) {
         return gioHangRepository.findByKhachHang(khachHang);
     }
 
-    // ✅ Lấy giỏ hàng theo khách hàng và trạng thái
     public List<GioHang> getByKhachHangAndTrangThai(KhachHang khachHang, boolean trangThai) {
         return gioHangRepository.findByKhachHangAndTrangThai(khachHang, trangThai);
     }
 
-    // ✅ Lọc giỏ hàng theo trạng thái
     public List<GioHang> getByTrangThai(boolean trangThai) {
         return gioHangRepository.findByTrangThai(trangThai);
     }
+    
+    
 }

@@ -33,6 +33,8 @@ public class KhachHang {
     @ManyToOne
     @JoinColumn(name = "userID")
     private Users user;
+
+
     
     @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

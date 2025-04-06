@@ -61,31 +61,33 @@
     },
     methods: {
       handleRegister() {
-        fetch('http://localhost:8080/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.form)
-        })
-          .then(async res => {
-            const text = await res.text();
-            if (res.ok) {
-              this.message = text || 'Đăng ký thành công!';
-              this.messageClass = 'alert-success';
-  
-              // ⏳ Chờ 1.5 giây rồi chuyển về trang đăng nhập
-              setTimeout(() => {
-                this.$router.push('/dangnhap/0');
-              }, 1500);
-            } else {
-              this.message = text || 'Đăng ký thất bại!';
-              this.messageClass = 'alert-danger';
-            }
-          })
-          .catch(() => {
-            this.message = 'Lỗi kết nối máy chủ!';
-            this.messageClass = 'alert-danger';
-          });
-      }
+  // Gửi yêu cầu đến đúng API và gán vai trò mặc định là 3 (khách hàng)
+  fetch('http://localhost:8080/api/auth/register', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(this.form)
+})
+  .then(async res => {
+    const text = await res.text();
+    if (res.ok) {
+      this.message = text || 'Đăng ký thành công!';
+      this.messageClass = 'alert-success';
+
+      setTimeout(() => {
+        this.$router.push('/dangnhap/0');
+      }, 1500);
+    } else {
+      this.message = text || 'Đăng ký thất bại!';
+      this.messageClass = 'alert-danger';
+    }
+  })
+  .catch(() => {
+    this.message = 'Lỗi kết nối máy chủ!';
+    this.messageClass = 'alert-danger';
+  });
+
+}
+
     }
   };
   </script>

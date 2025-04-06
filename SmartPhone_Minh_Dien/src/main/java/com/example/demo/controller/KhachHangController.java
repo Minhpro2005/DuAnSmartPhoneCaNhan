@@ -29,6 +29,14 @@ public class KhachHangController {
         return kh.map(ResponseEntity::ok)
                  .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    
+    @GetMapping("/user/{userID}")
+    public ResponseEntity<KhachHang> getByUserID(@PathVariable int userID) {
+        return khachHangService.getByUserID(userID)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
     // ✅ Thêm khách hàng mới
     @PostMapping("/khachhang")

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
@@ -17,4 +18,7 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
 
     // Tìm theo Email
     KhachHang findByEmail(String email);
+    
+    Optional<KhachHang> findByUser_UserID(int userID); // ✅ Sửa đúng tại đây
+
 }

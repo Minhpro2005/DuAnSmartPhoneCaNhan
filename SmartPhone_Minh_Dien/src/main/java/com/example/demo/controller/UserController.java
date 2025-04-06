@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Users;
+import com.example.demo.repository.KhachHangRepository;
 import com.example.demo.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,34 +23,40 @@ public class UserController {
     @Autowired
     private UsersService usersService;
 
-    // Lấy danh sách người dùng
+    @Autowired
+    private KhachHangRepository khachHangRepository;
+
+    // ✅ Lấy danh sách người dùng
     @GetMapping
     public ResponseEntity<List<Users>> getAllUsers() {
         return ResponseEntity.ok(usersService.getAllUsers());
     }
 
-    // Lấy thông tin người dùng theo ID
+    // ✅ Lấy người dùng theo ID
     @GetMapping("/{id}")
     public ResponseEntity<Users> getUserById(@PathVariable int id) {
         Optional<Users> userOpt = usersService.getUserById(id);
         return userOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Tạo mới người dùng
+    // ✅ Đăng ký hoặc thêm người dùng mới
     @PostMapping
     public ResponseEntity<Users> createUser(@RequestBody Users user) {
+        if (user.getVaiTro() == 0) {
+            user.setVaiTro(3); // Mặc định là khách hàng nếu không chỉ định
+        }
         Users createdUser = usersService.createUser(user);
         return ResponseEntity.ok(createdUser);
     }
 
-    // Đăng nhập
+    // ✅ Đăng nhập
     @PostMapping("/login")
     public ResponseEntity<Users> login(@RequestBody Users loginRequest) {
         Optional<Users> userOpt = usersService.login(loginRequest.getEmail(), loginRequest.getMatKhau());
         return userOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(401).build());
     }
 
-    // Cập nhật trạng thái (hoạt động/khóa)
+    // ✅ Cập nhật trạng thái (hoạt động/khóa)
     @PutMapping("/{id}/status")
     public ResponseEntity<Users> updateLoginStatus(@PathVariable int id, @RequestBody LoginStatusDTO body) {
         Optional<Users> userOpt = usersService.getUserById(id);
@@ -62,7 +69,7 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-    // Cập nhật người dùng với multipart/form-data (upload avatar)
+    // ✅ Cập nhật người dùng với avatar (multipart/form-data)
     @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     public ResponseEntity<Users> updateUserWithAvatar(
             @PathVariable("id") Integer id,
@@ -99,14 +106,21 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    // Xóa người dùng
+    // ✅ Cập nhật thông tin JSON
+    @PutMapping(value = "/{id}", consumes = "application/json")
+    public ResponseEntity<Users> updateUserJSON(@PathVariable int id, @RequestBody Users user) {
+        return ResponseEntity.ok(usersService.updateUser(id, user));
+    }
+
+    // ✅ Xóa người dùng (xóa khách hàng liên kết trước)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable int id) {
+        khachHangRepository.findByUser_UserID(id).ifPresent(kh -> khachHangRepository.delete(kh));
         usersService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Trả về vai trò người dùng
+    // ✅ Trả về tên vai trò
     @GetMapping("/role/{vaiTro}")
     public ResponseEntity<String> getRoleName(@PathVariable int vaiTro) {
         return ResponseEntity.ok(usersService.getRoleName(vaiTro));

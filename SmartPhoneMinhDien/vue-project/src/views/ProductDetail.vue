@@ -86,45 +86,51 @@ const addToCart = async () => {
       return;
     }
 
-    const variant = selectedVariant.value;
-    const maSP = variant?.sanPham?.maSP || product.value.maSP;
+    // ✅ LẤY maKH từ userID
+    const resKH = await fetch(`http://localhost:8080/smartphone/user/${user.userID}`);
+    if (!resKH.ok) throw new Error("Không tìm thấy thông tin khách hàng");
 
-    console.log("🧪 maSP gửi lên:", maSP);
+    const khachHang = await resKH.json();
+    const maKH = khachHang.maKH;
 
-    let gioHangRes = await fetch(`http://localhost:8080/smartphone/giohang/khachhang/${user.userID}/trangthai/true`);
-    let gioHangList = await gioHangRes.json();
-    let gioHang = gioHangList[0];
+    // ✅ Lấy giỏ hàng hiện tại nếu có
+    let gioHangRes = await fetch(`http://localhost:8080/smartphone/giohang/khachhang/${maKH}/trangthai/true`);
+    let gioHangList = gioHangRes.ok ? await gioHangRes.json() : [];
+    let gioHang = gioHangList.length ? gioHangList[0] : null;
 
+    // ✅ Tạo giỏ hàng nếu chưa có
     if (!gioHang) {
       const createRes = await fetch(`http://localhost:8080/smartphone/giohang`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ khachHang: { maKH: user.userID }, trangThai: true })
+        body: JSON.stringify({ khachHang: { maKH }, trangThai: true })
       });
+      if (!createRes.ok) throw new Error("Tạo giỏ hàng thất bại!");
       gioHang = await createRes.json();
     }
 
-    // 🛒 Thêm vào giỏ
+    // ✅ Thêm sản phẩm vào giỏ
     await fetch(`http://localhost:8080/smartphone/giohangchitiet`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         gioHang: { maGioHang: gioHang.maGioHang },
-        sanPham: { maSP }, // ✅ Sửa chuẩn rồi
-        bienThe: variant?.maBienThe ? { maBienThe: variant.maBienThe } : null,
-        mauSac: variant?.mauSac || product.value.mauSac,
+        sanPham: { maSP: selectedVariant.value?.sanPham?.maSP || product.value.maSP },
+        bienThe: selectedVariant.value?.maBienThe ? { maBienThe: selectedVariant.value.maBienThe } : null,
+        mauSac: selectedVariant.value?.mauSac || product.value.mauSac,
         soLuong: quantity.value,
-        giaBan: variant?.giaBan || product.value.giaBan
+        giaBan: selectedVariant.value?.giaBan || product.value.giaBan
       })
     });
 
     alert("✅ Sản phẩm đã được thêm vào giỏ hàng!");
 
   } catch (error) {
-    console.error("Lỗi khi thêm giỏ hàng:", error);
-    alert("❌ Thêm vào giỏ hàng thất bại.");
+    console.error("❌ Lỗi khi thêm giỏ hàng:", error);
+    alert("Thêm vào giỏ hàng thất bại!");
   }
 };
+
 
 
 onMounted(() => {

@@ -1,29 +1,4 @@
 <template>
-   <!-- Bootstrap & Icon CDN -->
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
- <!-- Navbar -->
- <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
-    <div class="container">
-      <a class="navbar-brand" href="#">
-        <img src="https://images.unsplash.com/photo-1633409361618-c73427e4e206" alt="Logo" width="40" height="40" class="rounded-circle me-2">
-        Công Minh Mobile
-      </a>
-      <div class="search-bar d-flex ms-auto me-3">
-        <input type="text" class="form-control me-2" placeholder="Bạn muốn tìm gì?">
-        <button class="btn btn-outline-dark"><i class="bi bi-search"></i></button>
-      </div>
-      <ul class="navbar-nav">
-        <li class="nav-item"><RouterLink class="nav-link" to="/home">Trang chủ</RouterLink></li>
-        <li class="nav-item"><RouterLink class="nav-link" to="/store">Cửa hàng</RouterLink></li>
-        <li class="nav-item"><RouterLink class="nav-link" to="/contact">Liên hệ</RouterLink></li>
-        <li class="nav-item"><RouterLink class="nav-link" to="/dangnhap/1">Tài khoản</RouterLink></li>
-        <li class="nav-item"><RouterLink class="nav-link" to="/giohang"><i class="fas fa-shopping-cart"></i> Giỏ hàng</RouterLink></li>
-      </ul>
-    </div>
-  </nav>
   <div class="container mt-5">
     <h4 class="text-center mb-4">Giỏ hàng của bạn</h4>
 
@@ -32,7 +7,6 @@
     </div>
 
     <div v-else>
-      <!-- Chọn tất cả -->
       <div class="form-check mb-3">
         <input class="form-check-input" type="checkbox" id="selectAll" v-model="selectAll" @change="toggleSelectAll" />
         <label class="form-check-label" for="selectAll">Chọn tất cả</label>
@@ -80,41 +54,52 @@
       </div>
 
       <div class="d-flex justify-content-between align-items-center mb-4">
-  <button class="btn btn-outline-secondary d-flex align-items-center" @click="goBack">
-    <i class="bi bi-arrow-left me-1"></i> 
-  </button>
-  <button class="btn btn-danger me-2" @click="buyNow">Mua ngay</button>
-</div>
-
+        <button class="btn btn-outline-secondary d-flex align-items-center" @click="goBack">
+          <i class="bi bi-arrow-left me-1"></i>
+        </button>
+        <button class="btn btn-danger me-2" @click="buyNow">Mua ngay</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 
 const placeholder = 'https://placehold.co/100x100?text=No+Image';
-const router = useRouter();
 const cartItems = ref([]);
 const selectAll = ref(false);
 
-const getPrice = (price) => typeof price === 'string' ? parseInt(price.replace(/\D/g, '')) || 0 : price;
+const getPrice = (price) =>
+  typeof price === 'string' ? parseInt(price.replace(/\D/g, '')) || 0 : price;
 
-onMounted(async () => {
-  const user = JSON.parse(localStorage.getItem("user"));
+const loadCart = async () => {
+  const user = JSON.parse(localStorage.getItem('user'));
   if (!user || !user.userID) return;
 
   try {
-    const resGH = await fetch(`http://localhost:8080/smartphone/giohang/khachhang/${user.userID}/trangthai/true`);
+    // ✅ Lấy maKH từ userID
+    const resKH = await fetch(`http://localhost:8080/smartphone/user/${user.userID}`);
+    if (!resKH.ok) throw new Error('Không tìm thấy thông tin khách hàng');
+
+    const khachHang = await resKH.json();
+    const maKH = khachHang.maKH;
+
+    // ✅ Lấy giỏ hàng theo maKH và trạng thái
+    const resGH = await fetch(
+      `http://localhost:8080/smartphone/giohang/khachhang/${maKH}/trangthai/true`
+    );
     const gioHangList = await resGH.json();
     const gioHang = gioHangList[0];
     if (!gioHang) return;
 
-    const resCT = await fetch(`http://localhost:8080/smartphone/giohangchitiet/giohang/${gioHang.maGioHang}`);
+    // ✅ Lấy chi tiết giỏ hàng
+    const resCT = await fetch(
+      `http://localhost:8080/smartphone/giohangchitiet/giohang/${gioHang.maGioHang}`
+    );
     const chiTietList = await resCT.json();
 
-    cartItems.value = chiTietList.map(item => ({
+    cartItems.value = chiTietList.map((item) => ({
       id: item.id,
       name: item.bienThe ? item.bienThe.sanPham.tenSP : item.sanPham.tenSP,
       image: item.bienThe?.hinhAnh || item.sanPham.hinhAnhSP,
@@ -127,14 +112,17 @@ onMounted(async () => {
       maBienThe: item.bienThe?.maBienThe || null
     }));
 
-    // Lưu số lượng về backend ngay khi load
+    // ✅ Đồng bộ số lượng lên backend
     for (const item of cartItems.value) {
       await updateBackendQuantity(item);
     }
-
   } catch (error) {
-    console.error("Lỗi khi load giỏ hàng:", error);
+    console.error('Lỗi khi load giỏ hàng:', error);
   }
+};
+
+onMounted(() => {
+  loadCart();
 });
 
 const updateBackendQuantity = async (item) => {
@@ -170,38 +158,45 @@ const removeItem = async (index) => {
   const item = cartItems.value[index];
   if (confirm('Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?')) {
     try {
-      await fetch(`http://localhost:8080/smartphone/giohangchitiet/id/${item.id}`, { method: 'DELETE' });
+      await fetch(`http://localhost:8080/smartphone/giohangchitiet/id/${item.id}`, {
+        method: 'DELETE'
+      });
       cartItems.value.splice(index, 1);
     } catch (error) {
-      console.error("Lỗi khi xoá sản phẩm:", error);
-      alert("❌ Không thể xoá sản phẩm khỏi giỏ hàng!");
+      console.error('Lỗi khi xoá sản phẩm:', error);
+      alert('❌ Không thể xoá sản phẩm khỏi giỏ hàng!');
     }
   }
 };
 
 const toggleSelectAll = () => {
-  cartItems.value.forEach(item => item.selected = selectAll.value);
+  cartItems.value.forEach((item) => (item.selected = selectAll.value));
 };
 
 const total = computed(() =>
-  cartItems.value.reduce((sum, item) =>
-    item.selected ? sum + getPrice(item.price) * item.quantity : sum, 0)
+  cartItems.value.reduce(
+    (sum, item) =>
+      item.selected ? sum + getPrice(item.price) * item.quantity : sum,
+    0
+  )
 );
 
-const formatVND = (value) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+const formatVND = (value) =>
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+    value
+  );
 
 const goBack = () => window.history.back();
 
 const buyNow = () => {
-  const selected = cartItems.value.filter(item => item.selected);
+  const selected = cartItems.value.filter((item) => item.selected);
   if (selected.length === 0) {
-    alert("Vui lòng chọn ít nhất một sản phẩm để mua!");
+    alert('Vui lòng chọn ít nhất một sản phẩm để mua!');
     return;
   }
   alert(`Bạn đã mua ${selected.length} sản phẩm với tổng ${formatVND(total.value)}`);
 };
 </script>
-
 
 <style scoped>
 .img-thumbnail {

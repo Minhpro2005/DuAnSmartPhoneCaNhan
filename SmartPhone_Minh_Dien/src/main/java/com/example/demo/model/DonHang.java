@@ -39,4 +39,15 @@ public class DonHang {
 
     @Column(nullable = false, length = 15)
     private String sdtGiaoHang;
+    
+    @Transient
+    public String getTenKhachHang() {
+        return khachHang != null ? khachHang.getTenKH(): "";
+    }
+
+    @Transient
+    public String getSoDienThoai() {
+        return khachHang != null ? khachHang.getSdt() : "";
+    }
+
 }

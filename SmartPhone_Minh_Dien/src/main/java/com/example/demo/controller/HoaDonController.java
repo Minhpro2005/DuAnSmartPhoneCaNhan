@@ -44,9 +44,20 @@ public class HoaDonController {
     // ✅ Tạo mới hóa đơn
     @PostMapping
     public ResponseEntity<HoaDon> create(@RequestBody HoaDon hoaDon) {
+        // Check if the KhachHang (customer) exists
+        Optional<KhachHang> khachHang = khachHangService.getKhachHangById(hoaDon.getKhachHang().getMaKH());
+        
+        if (!khachHang.isPresent()) {
+            return ResponseEntity.badRequest().body(null); // Return error if customer not found
+        }
+        
+        hoaDon.setKhachHang(khachHang.get());  // Set the valid KhachHang to HoaDon
+        
         HoaDon created = hoaDonService.create(hoaDon);
         return ResponseEntity.ok(created);
     }
+
+
 
     // ✅ Cập nhật hóa đơn
     @PutMapping("/id/{id}")

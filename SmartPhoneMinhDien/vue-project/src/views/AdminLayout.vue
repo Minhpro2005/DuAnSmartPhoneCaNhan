@@ -49,6 +49,16 @@
       Quản lý nhân viên
     </router-link>
   </li>
+  <li class="nav-item">
+  <router-link
+    to="/admin/donhang"
+    class="nav-link text-white"
+    :class="{ 'fw-bold': $route.path.startsWith('/admin/donhang') }"
+  >
+    Quản lý đơn hàng
+  </router-link>
+</li>
+
 </ul>
       </nav>
 

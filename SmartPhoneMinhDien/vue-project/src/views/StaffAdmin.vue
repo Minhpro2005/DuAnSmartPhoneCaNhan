@@ -12,45 +12,48 @@
       </div>
       <div class="card-body">
         <table class="table table-bordered table-hover">
-          <thead class="table-light">
-            <tr>
-              <th>Ảnh</th>
-              <th>Họ tên</th>
-              <th>Email</th>
-              <th>SĐT</th>
-              <th>CCCD</th>
-              <th>Ngày sinh</th>
-              <th>Ngày tạo</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="nv in filteredNhanViens" :key="nv.userID">
-              <td>
-                <img :src="nv.hinhAnh ? 'http://localhost:8080' + nv.hinhAnh : 'https://via.placeholder.com/50'" alt="avatar" class="rounded-circle" width="50" />
-              </td>
-              <td>{{ nv.hoTen }}</td>
-              <td>{{ nv.email }}</td>
-              <td>{{ nv.sdt }}</td>
-              <td>{{ nv.cccd }}</td>
-              <td>{{ formatDate(nv.ngaySinh) }}</td>
-              <td>{{ formatDate(nv.ngayTao) }}</td>
-              <td>
-                <span :class="nv.trangThai ? 'text-success' : 'text-danger'">
-                  {{ nv.trangThai ? 'Hoạt động' : 'Đã khóa' }}
-                </span>
-              </td>
-              <td>
-                <button class="btn btn-sm btn-info me-1" @click="editNhanVien(nv)">Sửa</button>
-                <button class="btn btn-sm btn-warning me-1" @click="toggleTrangThai(nv)">
-                  {{ nv.trangThai ? 'Khóa' : 'Mở khóa' }}
-                </button>
-                <button class="btn btn-sm btn-danger" @click="deleteNhanVien(nv.userID)">Xóa</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  <thead class="table-light">
+    <tr>
+      <th>Mã NV</th>
+      <th>Ảnh</th>
+      <th>Họ tên</th>
+      <th>Email</th>
+      <th>SĐT</th>
+      <th>CCCD</th>
+      <th>Ngày sinh</th>
+      <th>Ngày tạo</th>
+      <th>Trạng thái</th>
+      <th>Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-for="nv in filteredNhanViens" :key="nv.userID">
+      <td>{{ nv.maNV }}</td>
+      <td>
+        <img :src="nv.hinhAnh ? 'http://localhost:8080' + nv.hinhAnh : 'https://via.placeholder.com/50'" alt="avatar" class="rounded-circle" width="50" />
+      </td>
+      <td>{{ nv.hoTen }}</td>
+      <td>{{ nv.email }}</td>
+      <td>{{ nv.sdt }}</td>
+      <td>{{ nv.cccd }}</td>
+      <td>{{ formatDate(nv.ngaySinh) }}</td>
+      <td>{{ formatDate(nv.ngayTao) }}</td>
+      <td>
+        <span :class="nv.trangThai ? 'text-success' : 'text-danger'">
+          {{ nv.trangThai ? 'Hoạt động' : 'Đã khóa' }}
+        </span>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-info me-1" @click="editNhanVien(nv)">Sửa</button>
+        <button class="btn btn-sm btn-warning me-1" @click="toggleTrangThai(nv)">
+          {{ nv.trangThai ? 'Khóa' : 'Mở khóa' }}
+        </button>
+        <button class="btn btn-sm btn-danger" @click="deleteNhanVien(nv.userID)">Xóa</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
       </div>
     </div>
 

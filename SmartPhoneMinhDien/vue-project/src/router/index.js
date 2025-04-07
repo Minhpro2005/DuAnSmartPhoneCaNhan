@@ -16,6 +16,10 @@ import LichSuMuaHang from '@/views/LichSuMuaHang.vue'
 import Register from '@/views/Register.vue'
 import ThongTinCaNhan from '@/views/ThongTinCaNhan.vue'
 import StaffAdmin from '@/views/StaffAdmin.vue'
+import DonHangAdmin from '@/views/DonHangAdmin.vue'
+import DonHangChiTiet from '@/views/DonHangChiTiet.vue'
+import DatHang from '@/views/DatHang.vue'
+import HoaDon from '@/views/HoaDon.vue'
 
 const routes = [
   {
@@ -53,6 +57,18 @@ const routes = [
     props: true
   },
   {
+    path: '/dathang/:id',
+    name: 'DatHang',
+    component: DatHang,
+    props: true
+  },  
+  {
+    path: '/hoadon/:id',
+    name: 'HoaDon',
+    component: HoaDon,
+    props: true
+  },  
+  {
     path: '/admin',
     component: AdminLayout,
     children: [
@@ -87,7 +103,18 @@ const routes = [
         name: 'BienThe',
         component: BienTheSanPham,
         props: true
-      }
+      },
+      {
+        path: 'donhang',
+        name: 'DonHangAdmin',
+        component: DonHangAdmin
+      },
+      {
+        path: 'donhang/:id',
+        name: 'DonHangChiTiet',
+        component: DonHangChiTiet,
+        props: true
+      },
     ]
   }
 ]

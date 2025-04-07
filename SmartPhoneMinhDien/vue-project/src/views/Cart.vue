@@ -1,102 +1,83 @@
 <template>
-  <div class="container mt-5">
-    <h4 class="text-center mb-4">Giỏ hàng của bạn</h4>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <div v-if="cartItems.length === 0" class="alert alert-info text-center">
-      Giỏ hàng trống.
+  <div class="container mt-4">
+    <div class="d-flex align-items-center mb-3">
+      <button class="btn btn-link text-danger" @click="goBack">
+        <i class="bi bi-arrow-left"></i>
+      </button>
+      <h4 class="mb-0 ms-2 text-danger fw-bold">Giỏ hàng</h4>
     </div>
 
-    <div v-else>
-      <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" id="selectAll" v-model="selectAll" @change="toggleSelectAll" />
-        <label class="form-check-label" for="selectAll">Chọn tất cả</label>
-      </div>
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" v-model="selectAll" @change="toggleSelectAll" />
+      <label class="form-check-label">Chọn tất cả</label>
+    </div>
 
-      <table class="table table-bordered align-middle">
-        <thead class="table-light">
-          <tr>
-            <th></th>
-            <th>Hình ảnh</th>
-            <th>Tên sản phẩm</th>
-            <th>Giá</th>
-            <th>Số lượng</th>
-            <th>Tổng</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in cartItems" :key="item.id">
-            <td>
-              <input type="checkbox" v-model="item.selected" />
-            </td>
-            <td><img :src="item.image || placeholder" class="img-thumbnail" width="80" /></td>
-            <td>{{ item.name }}</td>
-            <td>{{ formatVND(getPrice(item.price)) }}</td>
-            <td>
-              <div class="input-group" style="max-width: 120px;">
-                <button class="btn btn-outline-secondary" @click="updateQuantity(index, -1)">-</button>
-                <input class="form-control text-center" type="text" :value="item.quantity" readonly />
-                <button class="btn btn-outline-secondary" @click="updateQuantity(index, 1)">+</button>
-              </div>
-            </td>
-            <td>{{ formatVND(getPrice(item.price) * item.quantity) }}</td>
-            <td>
-              <button class="btn btn-danger btn-sm" @click="removeItem(index)">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-for="(item, index) in cartItems" :key="item.id" class="card mb-3 shadow-sm">
+      <div class="card-body d-flex align-items-center">
+        <input type="checkbox" v-model="item.selected" class="me-3" />
+        <img :src="item.image || placeholder" class="img-thumbnail me-3" width="80" height="80" />
 
-      <div class="text-end fw-bold mt-3">
-        Tổng cộng: <span class="text-danger">{{ formatVND(total) }}</span>
-      </div>
+        <div class="flex-grow-1">
+          <h6 class="mb-1">{{ item.name }} {{ item.color ? '(' + item.color + ')' : '' }}</h6>
+          <div class="text-danger fw-bold mb-2">{{ formatVND(getPrice(item.price)) }}</div>
+          <div class="text-muted small mb-2">
+            <i class="bi bi-tag-fill me-1"></i> Chương trình khuyến mãi:
+          </div>
+        </div>
 
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <button class="btn btn-outline-secondary d-flex align-items-center" @click="goBack">
-          <i class="bi bi-arrow-left me-1"></i>
+        <div class="d-flex align-items-center me-3">
+          <button class="btn btn-outline-secondary btn-sm" @click="updateQuantity(index, -1)">-</button>
+          <input type="text" class="form-control text-center mx-1" :value="item.quantity" style="width: 40px;" readonly />
+          <button class="btn btn-outline-secondary btn-sm" @click="updateQuantity(index, 1)">+</button>
+        </div>
+
+        <button class="btn btn-link text-danger" @click="removeItem(index)">
+          <i class="bi bi-trash-fill fs-5"></i>
         </button>
-        <button class="btn btn-danger me-2" @click="buyNow">Mua ngay</button>
       </div>
+    </div>
+
+    <div class="bg-light p-3 d-flex justify-content-between align-items-center rounded">
+      <div class="fw-bold fs-5">
+        Tạm tính: <span class="text-danger">{{ formatVND(total) }}</span>
+      </div>
+      <button class="btn btn-danger" @click="buyNow">Mua ngay ({{ cartItems.filter(i => i.selected).length }})</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const placeholder = 'https://placehold.co/100x100?text=No+Image';
+
 const cartItems = ref([]);
 const selectAll = ref(false);
 
-const getPrice = (price) =>
-  typeof price === 'string' ? parseInt(price.replace(/\D/g, '')) || 0 : price;
+const getPrice = (price) => typeof price === 'string' ? parseInt(price.replace(/\D/g, '')) || 0 : price;
 
 const loadCart = async () => {
   const user = JSON.parse(localStorage.getItem('user'));
   if (!user || !user.userID) return;
 
   try {
-    // ✅ Lấy maKH từ userID
     const resKH = await fetch(`http://localhost:8080/smartphone/user/${user.userID}`);
     if (!resKH.ok) throw new Error('Không tìm thấy thông tin khách hàng');
-
     const khachHang = await resKH.json();
     const maKH = khachHang.maKH;
 
-    // ✅ Lấy giỏ hàng theo maKH và trạng thái
-    const resGH = await fetch(
-      `http://localhost:8080/smartphone/giohang/khachhang/${maKH}/trangthai/true`
-    );
+    const resGH = await fetch(`http://localhost:8080/smartphone/giohang/khachhang/${maKH}/trangthai/true`);
     const gioHangList = await resGH.json();
     const gioHang = gioHangList[0];
     if (!gioHang) return;
 
-    // ✅ Lấy chi tiết giỏ hàng
-    const resCT = await fetch(
-      `http://localhost:8080/smartphone/giohangchitiet/giohang/${gioHang.maGioHang}`
-    );
+    const resCT = await fetch(`http://localhost:8080/smartphone/giohangchitiet/giohang/${gioHang.maGioHang}`);
     const chiTietList = await resCT.json();
 
     cartItems.value = chiTietList.map((item) => ({
@@ -112,7 +93,6 @@ const loadCart = async () => {
       maBienThe: item.bienThe?.maBienThe || null
     }));
 
-    // ✅ Đồng bộ số lượng lên backend
     for (const item of cartItems.value) {
       await updateBackendQuantity(item);
     }
@@ -120,10 +100,6 @@ const loadCart = async () => {
     console.error('Lỗi khi load giỏ hàng:', error);
   }
 };
-
-onMounted(() => {
-  loadCart();
-});
 
 const updateBackendQuantity = async (item) => {
   try {
@@ -158,9 +134,7 @@ const removeItem = async (index) => {
   const item = cartItems.value[index];
   if (confirm('Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?')) {
     try {
-      await fetch(`http://localhost:8080/smartphone/giohangchitiet/id/${item.id}`, {
-        method: 'DELETE'
-      });
+      await fetch(`http://localhost:8080/smartphone/giohangchitiet/id/${item.id}`, { method: 'DELETE' });
       cartItems.value.splice(index, 1);
     } catch (error) {
       console.error('Lỗi khi xoá sản phẩm:', error);
@@ -175,16 +149,13 @@ const toggleSelectAll = () => {
 
 const total = computed(() =>
   cartItems.value.reduce(
-    (sum, item) =>
-      item.selected ? sum + getPrice(item.price) * item.quantity : sum,
+    (sum, item) => item.selected ? sum + getPrice(item.price) * item.quantity : sum,
     0
   )
 );
 
 const formatVND = (value) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-    value
-  );
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 
 const goBack = () => window.history.back();
 
@@ -194,8 +165,29 @@ const buyNow = () => {
     alert('Vui lòng chọn ít nhất một sản phẩm để mua!');
     return;
   }
-  alert(`Bạn đã mua ${selected.length} sản phẩm với tổng ${formatVND(total.value)}`);
+  localStorage.setItem('selectedItems', JSON.stringify(selected));
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user || !user.userID) {
+    alert('Vui lòng đăng nhập để tiếp tục');
+    return;
+  }
+
+  fetch(`http://localhost:8080/smartphone/user/${user.userID}`)
+    .then((res) => res.json())
+    .then((khachHang) => {
+      const maKH = khachHang.maKH;
+      router.push(`/dathang/${maKH}`);
+    })
+    .catch((err) => {
+      console.error('Lỗi lấy thông tin khách hàng:', err);
+      alert('Không thể chuyển sang trang đặt hàng');
+    });
 };
+
+onMounted(() => {
+  loadCart();
+});
 </script>
 
 <style scoped>

@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Table(name = "GioHang")
 @Data
@@ -22,6 +24,8 @@ public class GioHang {
     private KhachHang khachHang;
 
     @Temporal(TemporalType.DATE)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+
     private Date ngayTao;
 
     private boolean trangThai = true;

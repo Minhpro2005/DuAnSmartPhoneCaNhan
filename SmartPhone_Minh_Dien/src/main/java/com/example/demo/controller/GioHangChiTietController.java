@@ -106,5 +106,12 @@ public class GioHangChiTietController {
         return ResponseEntity.notFound().build();
     }
     
+    @DeleteMapping("/reset/{maGioHang}")
+    public ResponseEntity<Void> reset(@PathVariable int maGioHang) {
+        chiTietService.deleteByGioHang(maGioHang); // 👍 Gọi theo ID
+        return ResponseEntity.noContent().build();
+    }
+
+
     
 }

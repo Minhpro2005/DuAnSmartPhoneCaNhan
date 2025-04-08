@@ -86,19 +86,16 @@ const addToCart = async () => {
       return;
     }
 
-    // ✅ LẤY maKH từ userID
     const resKH = await fetch(`http://localhost:8080/smartphone/user/${user.userID}`);
     if (!resKH.ok) throw new Error("Không tìm thấy thông tin khách hàng");
 
     const khachHang = await resKH.json();
     const maKH = khachHang.maKH;
 
-    // ✅ Lấy giỏ hàng hiện tại nếu có
     let gioHangRes = await fetch(`http://localhost:8080/smartphone/giohang/khachhang/${maKH}/trangthai/true`);
     let gioHangList = gioHangRes.ok ? await gioHangRes.json() : [];
     let gioHang = gioHangList.length ? gioHangList[0] : null;
 
-    // ✅ Tạo giỏ hàng nếu chưa có
     if (!gioHang) {
       const createRes = await fetch(`http://localhost:8080/smartphone/giohang`, {
         method: "POST",
@@ -109,19 +106,46 @@ const addToCart = async () => {
       gioHang = await createRes.json();
     }
 
-    // ✅ Thêm sản phẩm vào giỏ
-    await fetch(`http://localhost:8080/smartphone/giohangchitiet`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        gioHang: { maGioHang: gioHang.maGioHang },
-        sanPham: { maSP: selectedVariant.value?.sanPham?.maSP || product.value.maSP },
-        bienThe: selectedVariant.value?.maBienThe ? { maBienThe: selectedVariant.value.maBienThe } : null,
-        mauSac: selectedVariant.value?.mauSac || product.value.mauSac,
-        soLuong: quantity.value,
-        giaBan: selectedVariant.value?.giaBan || product.value.giaBan
-      })
-    });
+    // 🔍 Tìm xem đã có sản phẩm tương tự chưa
+    const chiTietRes = await fetch(`http://localhost:8080/smartphone/giohangchitiet/giohang/${gioHang.maGioHang}`);
+    const chiTietList = await chiTietRes.json();
+
+    const existingItem = chiTietList.find(item =>
+      item.sanPham.maSP === (selectedVariant.value?.sanPham?.maSP || product.value.maSP) &&
+      (item.bienThe?.maBienThe || null) === (selectedVariant.value?.maBienThe || null)
+    );
+
+    if (existingItem) {
+      // ✅ Nếu đã có thì cập nhật số lượng
+      const updatedSoLuong = existingItem.soLuong + quantity.value;
+      await fetch(`http://localhost:8080/smartphone/giohangchitiet/id/${existingItem.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: existingItem.id,
+          gioHang: { maGioHang: gioHang.maGioHang },
+          sanPham: { maSP: existingItem.sanPham.maSP },
+          bienThe: existingItem.bienThe ? { maBienThe: existingItem.bienThe.maBienThe } : null,
+          giaBan: existingItem.giaBan,
+          mauSac: existingItem.mauSac,
+          soLuong: updatedSoLuong
+        })
+      });
+    } else {
+      // ✅ Nếu chưa có thì thêm mới
+      await fetch(`http://localhost:8080/smartphone/giohangchitiet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gioHang: { maGioHang: gioHang.maGioHang },
+          sanPham: { maSP: selectedVariant.value?.sanPham?.maSP || product.value.maSP },
+          bienThe: selectedVariant.value?.maBienThe ? { maBienThe: selectedVariant.value.maBienThe } : null,
+          mauSac: selectedVariant.value?.mauSac || product.value.mauSac,
+          soLuong: quantity.value,
+          giaBan: selectedVariant.value?.giaBan || product.value.giaBan
+        })
+      });
+    }
 
     alert("✅ Sản phẩm đã được thêm vào giỏ hàng!");
 
@@ -130,6 +154,7 @@ const addToCart = async () => {
     alert("Thêm vào giỏ hàng thất bại!");
   }
 };
+
 
 
 

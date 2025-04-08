@@ -58,6 +58,16 @@
     Quản lý đơn hàng
   </router-link>
 </li>
+<li class="nav-item">
+  <router-link
+    to="/admin/giohang"
+    class="nav-link text-white"
+    :class="{ 'fw-bold': $route.path.startsWith('/admin/giohang') }"
+  >
+    Quản lý giỏ hàng
+  </router-link>
+</li>
+
 
 </ul>
       </nav>

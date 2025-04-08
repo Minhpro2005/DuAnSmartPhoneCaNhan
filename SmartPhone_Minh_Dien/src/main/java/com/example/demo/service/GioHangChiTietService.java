@@ -2,6 +2,10 @@ package com.example.demo.service;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.GioHangChiTietRepository;
+import com.example.demo.repository.GioHangRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +20,10 @@ public class GioHangChiTietService {
 
     @Autowired
     private BienTheSanPhamService bienTheSanPhamService;
+    
+    @Autowired
+    private GioHangRepository gioHangRepository;
+
 
     // Lấy tất cả chi tiết giỏ hàng
     public List<GioHangChiTiet> getAll() {
@@ -64,9 +72,19 @@ public class GioHangChiTietService {
     }
 
     // Xoá tất cả chi tiết theo giỏ hàng
+    @Transactional // ✅ Đây mới là đúng annotation của Spring
     public void deleteByGioHang(GioHang gioHang) {
         gioHangChiTietRepository.deleteByGioHang(gioHang);
     }
+
+    @Transactional
+    public void deleteByGioHang(int maGioHang) {
+        GioHang gioHang = gioHangRepository.findById(maGioHang)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giỏ hàng"));
+        gioHangChiTietRepository.deleteByGioHang(gioHang);
+    }
+
+
 
     // Lấy danh sách chi tiết theo giỏ hàng
     public List<GioHangChiTiet> getByGioHang(GioHang gioHang) {

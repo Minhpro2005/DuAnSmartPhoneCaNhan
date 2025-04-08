@@ -20,6 +20,8 @@ import DonHangAdmin from '@/views/DonHangAdmin.vue'
 import DonHangChiTiet from '@/views/DonHangChiTiet.vue'
 import DatHang from '@/views/DatHang.vue'
 import HoaDon from '@/views/HoaDon.vue'
+import GioHangAdmin from '@/views/GioHangAdmin.vue'
+import ChiTietGioHang from '@/views/ChiTietGioHang.vue'
 
 const routes = [
   {
@@ -115,6 +117,18 @@ const routes = [
         component: DonHangChiTiet,
         props: true
       },
+      {
+        path: 'giohang',
+        name: 'GioHangAdmin',
+        component: GioHangAdmin,
+        props: true
+      },
+      {
+        path: 'giohang/:maGioHang',
+        name: 'ChiTietGioHang',
+        component: (ChiTietGioHang) ,
+        props: true
+      }
     ]
   }
 ]

@@ -9,6 +9,7 @@ import com.example.demo.repository.KhachHangRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,18 +31,24 @@ public class GioHangService {
     }
 
     public GioHang create(GioHang gioHang) {
-        // Kiểm tra khách hàng null
+        // Kiểm tra khách hàng hợp lệ
         if (gioHang.getKhachHang() == null || gioHang.getKhachHang().getMaKH() == 0) {
             throw new IllegalArgumentException("Khách hàng không hợp lệ");
         }
 
-        // Load khách hàng đầy đủ từ DB
+        // Load khách hàng từ DB
         KhachHang kh = khachHangRepository.findById(gioHang.getKhachHang().getMaKH())
                                           .orElseThrow(() -> new IllegalArgumentException("Khách hàng không tồn tại"));
-
         gioHang.setKhachHang(kh);
+
+        // Gán ngày tạo nếu null
+        if (gioHang.getNgayTao() == null) {
+            gioHang.setNgayTao(new Date());
+        }
+
         return gioHangRepository.save(gioHang);
     }
+
 
 
     public GioHang update(int id, GioHang updated) {

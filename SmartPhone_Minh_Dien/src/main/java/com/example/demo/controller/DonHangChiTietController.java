@@ -42,9 +42,18 @@ public class DonHangChiTietController {
     // ✅ Thêm mới chi tiết
     @PostMapping
     public ResponseEntity<DonHangChiTiet> create(@RequestBody DonHangChiTiet chiTiet) {
+        if (chiTiet.getDonHang() == null || chiTiet.getSoLuong() <= 0 || chiTiet.getGiaBan() == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        if (chiTiet.getSanPham() == null && chiTiet.getBienTheSanPham() == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
         DonHangChiTiet created = chiTietService.create(chiTiet);
         return ResponseEntity.ok(created);
     }
+
 
     // ✅ Cập nhật chi tiết
     @PutMapping("/id/{id}")

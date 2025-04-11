@@ -90,24 +90,34 @@ public class DonHangService {
         if (chiTietList.isEmpty()) return;
 
         for (DonHangChiTiet ct : chiTietList) {
-            if (ct.getBienTheSanPham() != null) {
+            boolean hasBienThe = ct.getBienTheSanPham() != null;
+            boolean hasSanPham = ct.getSanPham() != null;
+
+            if (hasBienThe && hasSanPham) {
+                System.err.println("⚠️ Cảnh báo: Chi tiết đơn hàng có cả sản phẩm và biến thể. Ưu tiên biến thể.");
+            }
+
+            if (hasBienThe) {
                 BienTheSanPham bienThe = ct.getBienTheSanPham();
                 if (bienThe.getSoLuong() < ct.getSoLuong()) {
                     throw new RuntimeException("Không đủ hàng cho biến thể: " + bienThe.getTenBienThe());
                 }
                 bienThe.setSoLuong(bienThe.getSoLuong() - ct.getSoLuong());
                 bienTheRepo.save(bienThe);
-            } else if (ct.getSanPham() != null) {
+
+            } else if (hasSanPham) {
                 var sp = ct.getSanPham();
                 if (sp.getSoLuong() < ct.getSoLuong()) {
                     throw new RuntimeException("Không đủ hàng cho sản phẩm: " + sp.getTenSP());
                 }
                 sp.setSoLuong(sp.getSoLuong() - ct.getSoLuong());
                 sanPhamRepository.save(sp);
+
             } else {
                 throw new RuntimeException("Chi tiết đơn hàng không có sản phẩm hoặc biến thể.");
             }
         }
+
 
         dh.setTrangThai("Đã xác nhận");
         donHangRepository.save(dh);

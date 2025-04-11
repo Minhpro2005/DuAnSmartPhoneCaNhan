@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "DonHangChiTiet")
 @Data
@@ -22,11 +24,12 @@ public class DonHangChiTiet {
     private DonHang donHang;
 
     @ManyToOne
-    @JoinColumn(name = "maSP")
+    @JoinColumn(name = "maSP", nullable = true) // ✅ Cho phép null
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private SanPham sanPham;
 
     @ManyToOne
-    @JoinColumn(name = "maBienThe") // ✅ Cột này CÓ trong DB
+    @JoinColumn(name = "maBienThe", nullable = true) // ✅ Cho phép null
     private BienTheSanPham bienTheSanPham;
 
     @Column(nullable = false)

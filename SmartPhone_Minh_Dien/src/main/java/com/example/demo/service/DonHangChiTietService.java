@@ -26,7 +26,6 @@ public class DonHangChiTietService {
         return chiTietRepository.findById(id);
     }
 
-    // ✅ Thêm mới
     public DonHangChiTiet create(DonHangChiTiet chiTiet) {
         return chiTietRepository.save(chiTiet);
     }
@@ -38,13 +37,14 @@ public class DonHangChiTietService {
             DonHangChiTiet existing = existingOpt.get();
             existing.setDonHang(updated.getDonHang());
             existing.setSanPham(updated.getSanPham());
+            existing.setBienTheSanPham(updated.getBienTheSanPham()); // ⚠️ Thêm dòng này
             existing.setSoLuong(updated.getSoLuong());
             existing.setGiaBan(updated.getGiaBan());
             return chiTietRepository.save(existing);
         }
         return null;
     }
-
+    
     // ✅ Xoá theo ID
     public void delete(int id) {
         chiTietRepository.deleteById(id);

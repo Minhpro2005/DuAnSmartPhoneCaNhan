@@ -22,4 +22,7 @@ public interface DonHangChiTietRepository extends JpaRepository<DonHangChiTiet, 
 
     // ✅ Xoá chi tiết theo đơn hàng
     void deleteByDonHang(DonHang donHang);
+    
+    List<DonHangChiTiet> findByDonHang_MaDonHang(int maDonHang);
+
 }

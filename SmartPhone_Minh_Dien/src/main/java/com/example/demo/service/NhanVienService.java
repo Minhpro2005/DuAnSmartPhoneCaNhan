@@ -72,4 +72,9 @@ public class NhanVienService {
     public NhanVien searchByCccd(String cccd) {
         return nhanVienRepository.findByCccd(cccd);
     }
+    
+    public Optional<NhanVien> getByUserID(int userID) {
+        return nhanVienRepository.findByUser_UserID(userID);
+    }
+
 }

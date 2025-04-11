@@ -86,7 +86,8 @@ const addToCart = async () => {
       return;
     }
 
-    const resKH = await fetch(`http://localhost:8080/smartphone/user/${user.userID}`);
+    // ✅ Đã sửa: Đổi sang API lấy thông tin khách hàng
+    const resKH = await fetch(`http://localhost:8080/smartphone/khachhang/user/${user.userID}`);
     if (!resKH.ok) throw new Error("Không tìm thấy thông tin khách hàng");
 
     const khachHang = await resKH.json();
@@ -96,17 +97,23 @@ const addToCart = async () => {
     let gioHangList = gioHangRes.ok ? await gioHangRes.json() : [];
     let gioHang = gioHangList.length ? gioHangList[0] : null;
 
+    // ✅ Tạo giỏ hàng mới nếu chưa có
     if (!gioHang) {
+      const now = new Date().toISOString().split('T')[0]; // yyyy-MM-dd
       const createRes = await fetch(`http://localhost:8080/smartphone/giohang`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ khachHang: { maKH }, trangThai: true })
+        body: JSON.stringify({
+          khachHang: { maKH },
+          trangThai: true,
+          ngayTao: now
+        })
       });
       if (!createRes.ok) throw new Error("Tạo giỏ hàng thất bại!");
       gioHang = await createRes.json();
     }
 
-    // 🔍 Tìm xem đã có sản phẩm tương tự chưa
+    // 🔍 Kiểm tra sản phẩm đã có trong giỏ chưa
     const chiTietRes = await fetch(`http://localhost:8080/smartphone/giohangchitiet/giohang/${gioHang.maGioHang}`);
     const chiTietList = await chiTietRes.json();
 
@@ -116,7 +123,7 @@ const addToCart = async () => {
     );
 
     if (existingItem) {
-      // ✅ Nếu đã có thì cập nhật số lượng
+      // ✅ Cập nhật số lượng nếu đã tồn tại
       const updatedSoLuong = existingItem.soLuong + quantity.value;
       await fetch(`http://localhost:8080/smartphone/giohangchitiet/id/${existingItem.id}`, {
         method: "PUT",
@@ -132,7 +139,7 @@ const addToCart = async () => {
         })
       });
     } else {
-      // ✅ Nếu chưa có thì thêm mới
+      // ✅ Thêm sản phẩm mới vào giỏ hàng
       await fetch(`http://localhost:8080/smartphone/giohangchitiet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -154,9 +161,6 @@ const addToCart = async () => {
     alert("Thêm vào giỏ hàng thất bại!");
   }
 };
-
-
-
 
 onMounted(() => {
   fetchProduct();

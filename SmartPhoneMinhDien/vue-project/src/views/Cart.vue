@@ -1,8 +1,9 @@
 <template>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+   <!-- Bootstrap & Icon CDN -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+  
   <div class="container mt-4">
     <div class="d-flex align-items-center mb-3">
       <button class="btn btn-link text-danger" @click="goBack">
@@ -56,50 +57,26 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const placeholder = 'https://placehold.co/100x100?text=No+Image';
-
 const cartItems = ref([]);
 const selectAll = ref(false);
 
 const getPrice = (price) => typeof price === 'string' ? parseInt(price.replace(/\D/g, '')) || 0 : price;
 
-const loadCart = async () => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (!user || !user.userID) return;
+const formatVND = (value) =>
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 
-  try {
-    const resKH = await fetch(`http://localhost:8080/smartphone/user/${user.userID}`);
-    if (!resKH.ok) throw new Error('Không tìm thấy thông tin khách hàng');
-    const khachHang = await resKH.json();
-    const maKH = khachHang.maKH;
+const goBack = () => window.history.back();
 
-    const resGH = await fetch(`http://localhost:8080/smartphone/giohang/khachhang/${maKH}/trangthai/true`);
-    const gioHangList = await resGH.json();
-    const gioHang = gioHangList[0];
-    if (!gioHang) return;
-
-    const resCT = await fetch(`http://localhost:8080/smartphone/giohangchitiet/giohang/${gioHang.maGioHang}`);
-    const chiTietList = await resCT.json();
-
-    cartItems.value = chiTietList.map((item) => ({
-      id: item.id,
-      name: item.bienThe ? item.bienThe.sanPham.tenSP : item.sanPham.tenSP,
-      image: item.bienThe?.hinhAnh || item.sanPham.hinhAnhSP,
-      price: item.giaBan,
-      quantity: item.soLuong,
-      color: item.bienThe?.mauSac || item.mauSac,
-      selected: false,
-      maGioHang: item.gioHang.maGioHang,
-      maSP: item.sanPham.maSP,
-      maBienThe: item.bienThe?.maBienThe || null
-    }));
-
-    for (const item of cartItems.value) {
-      await updateBackendQuantity(item);
-    }
-  } catch (error) {
-    console.error('Lỗi khi load giỏ hàng:', error);
-  }
+const toggleSelectAll = () => {
+  cartItems.value.forEach((item) => (item.selected = selectAll.value));
 };
+
+const total = computed(() =>
+  cartItems.value.reduce(
+    (sum, item) => item.selected ? sum + getPrice(item.price) * item.quantity : sum,
+    0
+  )
+);
 
 const updateBackendQuantity = async (item) => {
   try {
@@ -143,21 +120,46 @@ const removeItem = async (index) => {
   }
 };
 
-const toggleSelectAll = () => {
-  cartItems.value.forEach((item) => (item.selected = selectAll.value));
+const loadCart = async () => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user || !user.userID) return;
+
+  try {
+    // ✅ Sửa lại đúng API khách hàng theo user
+    const resKH = await fetch(`http://localhost:8080/smartphone/khachhang/user/${user.userID}`);
+    if (!resKH.ok) throw new Error('Không tìm thấy thông tin khách hàng');
+    const khachHang = await resKH.json();
+    const maKH = khachHang.maKH;
+
+    const resGH = await fetch(`http://localhost:8080/smartphone/giohang/khachhang/${maKH}/trangthai/true`);
+    const gioHangList = await resGH.json();
+    const gioHang = gioHangList[0];
+    if (!gioHang) return;
+
+    const resCT = await fetch(`http://localhost:8080/smartphone/giohangchitiet/giohang/${gioHang.maGioHang}`);
+    const chiTietList = await resCT.json();
+
+    cartItems.value = chiTietList.map((item) => ({
+      id: item.id,
+      name: item.bienThe ? item.bienThe.sanPham.tenSP : item.sanPham.tenSP,
+      image: item.bienThe?.hinhAnh || item.sanPham.hinhAnhSP,
+      price: item.giaBan,
+      quantity: item.soLuong,
+      color: item.bienThe?.mauSac || item.mauSac,
+      selected: false,
+      maGioHang: item.gioHang.maGioHang,
+      maSP: item.sanPham.maSP,
+      maBienThe: item.bienThe?.maBienThe || null
+    }));
+
+    for (const item of cartItems.value) {
+      await updateBackendQuantity(item); // Cập nhật số lượng nếu cần
+    }
+
+  } catch (error) {
+    console.error('Lỗi khi load giỏ hàng:', error);
+  }
 };
-
-const total = computed(() =>
-  cartItems.value.reduce(
-    (sum, item) => item.selected ? sum + getPrice(item.price) * item.quantity : sum,
-    0
-  )
-);
-
-const formatVND = (value) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-
-const goBack = () => window.history.back();
 
 const buyNow = () => {
   const selected = cartItems.value.filter((item) => item.selected);
@@ -173,7 +175,8 @@ const buyNow = () => {
     return;
   }
 
-  fetch(`http://localhost:8080/smartphone/user/${user.userID}`)
+  // ✅ Sửa: gọi đúng API để lấy Khách Hàng
+  fetch(`http://localhost:8080/smartphone/khachhang/user/${user.userID}`)
     .then((res) => res.json())
     .then((khachHang) => {
       const maKH = khachHang.maKH;

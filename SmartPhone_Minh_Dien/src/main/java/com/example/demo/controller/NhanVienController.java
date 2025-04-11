@@ -28,20 +28,34 @@ public class NhanVienController {
     @Autowired
     private UsersService usersService;
 
-    // ✅ Lấy danh sách tất cả nhân viên
+    // Lấy danh sách tất cả nhân viên
     @GetMapping
     public List<NhanVien> getAll() {
         return nhanVienService.getAllNhanVien();
     }
 
-    // ✅ Lấy nhân viên theo ID
+    // Lấy nhân viên theo ID
     @GetMapping("/id/{id}")
     public ResponseEntity<NhanVien> getById(@PathVariable int id) {
         Optional<NhanVien> nv = nhanVienService.getNhanVienById(id);
         return nv.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // ✅ Thêm nhân viên mới với multipart
+    // Tìm theo email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<NhanVien> getByEmail(@PathVariable String email) {
+        NhanVien nv = nhanVienService.searchByEmail(email);
+        return nv != null ? ResponseEntity.ok(nv) : ResponseEntity.notFound().build();
+    }
+
+    // Tìm theo CCCD
+    @GetMapping("/cccd/{cccd}")
+    public ResponseEntity<NhanVien> searchByCccd(@PathVariable String cccd) {
+        NhanVien nv = nhanVienService.searchByCccd(cccd);
+        return nv != null ? ResponseEntity.ok(nv) : ResponseEntity.notFound().build();
+    }
+
+    // Thêm nhân viên mới
     @PostMapping(value = "/create", consumes = "multipart/form-data")
     public ResponseEntity<NhanVien> createNhanVienWithMultipart(
             @RequestParam("hoTen") String hoTen,
@@ -89,43 +103,36 @@ public class NhanVienController {
         return ResponseEntity.ok(nhanVienService.createNhanVien(nv));
     }
 
-    // ✅ Cập nhật nhân viên
+    // Cập nhật nhân viên
     @PutMapping("/id/{id}")
     public ResponseEntity<NhanVien> update(@PathVariable int id, @RequestBody NhanVien nhanVien) {
         NhanVien updated = nhanVienService.updateNhanVien(id, nhanVien);
         return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
-    // ✅ Xoá nhân viên
+    // Xoá nhân viên
     @DeleteMapping("/id/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
         nhanVienService.deleteNhanVien(id);
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ Tìm kiếm theo tên
+    // Tìm kiếm theo tên
     @GetMapping("/search")
     public List<NhanVien> searchByName(@RequestParam("keyword") String keyword) {
         return nhanVienService.searchByTen(keyword);
     }
 
-    // ✅ Tìm theo email
-    @GetMapping("/email/{email}")
-    public ResponseEntity<NhanVien> searchByEmail(@PathVariable String email) {
-        NhanVien nv = nhanVienService.searchByEmail(email);
-        return nv != null ? ResponseEntity.ok(nv) : ResponseEntity.notFound().build();
-    }
-
-    // ✅ Tìm theo SDT
+    // Tìm theo sĐT
     @GetMapping("/sdt/{sdt}")
     public List<NhanVien> searchBySdt(@PathVariable String sdt) {
         return nhanVienService.searchBySdt(sdt);
     }
-
-    // ✅ Tìm theo CCCD
-    @GetMapping("/cccd/{cccd}")
-    public ResponseEntity<NhanVien> searchByCccd(@PathVariable String cccd) {
-        NhanVien nv = nhanVienService.searchByCccd(cccd);
-        return nv != null ? ResponseEntity.ok(nv) : ResponseEntity.notFound().build();
+    
+    @GetMapping("/user/{userID}")
+    public ResponseEntity<NhanVien> getByUserID(@PathVariable int userID) {
+        Optional<NhanVien> nv = nhanVienService.getByUserID(userID);
+        return nv.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 }

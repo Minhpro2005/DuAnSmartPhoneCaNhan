@@ -22,6 +22,9 @@ import DatHang from '@/views/DatHang.vue'
 import HoaDon from '@/views/HoaDon.vue'
 import GioHangAdmin from '@/views/GioHangAdmin.vue'
 import ChiTietGioHang from '@/views/ChiTietGioHang.vue'
+import HoaDonAdmin from '@/views/HoaDonAdmin.vue'
+import HoaDonChiTiet from '@/views/HoaDonChiTiet.vue'
+import ThongTinNhanVien from '@/views/ThongTinNhanVien.vue'
 
 const routes = [
   {
@@ -74,6 +77,11 @@ const routes = [
     path: '/admin',
     component: AdminLayout,
     children: [
+      {
+        path: 'thongtinnhanvien',
+        name: 'ThongTinNhanVien',
+        component: ThongTinNhanVien
+      },
       {
         path: '',
         name: 'AdminProduct',
@@ -128,10 +136,22 @@ const routes = [
         name: 'ChiTietGioHang',
         component: (ChiTietGioHang) ,
         props: true
+      },
+      {
+        path: 'hoadon',
+        name: 'HoaDonAdmin',
+        component: HoaDonAdmin
+      },
+      {
+        path: 'hoadon/:id',
+        name: 'HoaDonChiTiet',
+        component: HoaDonChiTiet,
+        props: true
       }
     ]
   }
 ]
+
 
 const router = createRouter({
   history: createWebHistory(),

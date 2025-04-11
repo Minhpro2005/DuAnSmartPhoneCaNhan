@@ -80,4 +80,19 @@ public class DonHangController {
         return kh.map(value -> ResponseEntity.ok(donHangService.getByKhachHangAndTrangThai(value, trangThai)))
                  .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    
+    @PutMapping("/xacnhan/{id}")
+    public ResponseEntity<String> xacNhanDonHang(@PathVariable int id) {
+        try {
+            donHangService.xacNhanDonHangVaCapNhatSoLuong(id);
+            return ResponseEntity.ok("Đơn hàng đã được xác nhận và cập nhật tồn kho.");
+        } catch (RuntimeException e) {
+            System.err.println("❌ Lỗi xác nhận đơn hàng: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Có lỗi xảy ra: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Lỗi không xác định.");
+        }
+    }
+
 }

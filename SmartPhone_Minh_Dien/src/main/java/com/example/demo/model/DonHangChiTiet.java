@@ -25,6 +25,10 @@ public class DonHangChiTiet {
     @JoinColumn(name = "maSP")
     private SanPham sanPham;
 
+    @ManyToOne
+    @JoinColumn(name = "maBienThe") // ✅ Cột này CÓ trong DB
+    private BienTheSanPham bienTheSanPham;
+
     @Column(nullable = false)
     private int soLuong = 1;
 

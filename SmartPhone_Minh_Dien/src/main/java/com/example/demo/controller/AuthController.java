@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.KhachHang;
+import com.example.demo.model.LoginReques;
 import com.example.demo.model.RegisterRequest;
 import com.example.demo.model.Users;
 import com.example.demo.repository.KhachHangRepository;
@@ -58,6 +59,26 @@ public class AuthController {
         khachHangRepo.save(kh);
 
         return ResponseEntity.ok("Đăng ký thành công!");
+    }
+    
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginReques request) {
+        return usersRepo.findByEmail(request.getEmail())
+                .map(user -> {
+                    // So sánh mật khẩu (nếu cần mã hóa, dùng BCrypt sau)
+                    if (!user.getMatKhau().equals(request.getMatKhau())) {
+                        return ResponseEntity.status(401).body("Sai mật khẩu");
+                    }
+
+                    // Nếu tài khoản bị khóa
+                    if (!user.isTrangThai()) {
+                        return ResponseEntity.status(403).body("Tài khoản bị khóa");
+                    }
+
+                    // Trả về thông tin user cần thiết
+                    return ResponseEntity.ok(user);
+                })
+                .orElse(ResponseEntity.status(401).body("Email không tồn tại"));
     }
 
 }

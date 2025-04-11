@@ -37,6 +37,12 @@ public class KhachHangService {
     public KhachHang createKhachHang(KhachHang khachHang) {
         return khachHangRepository.save(khachHang);
     }
+    
+ // ✅ Save/update nhanh 1 khách hàng (dùng cho update địa chỉ)
+    public KhachHang save(KhachHang kh) {
+        return khachHangRepository.save(kh);
+    }
+
 
     // Cập nhật khách hàng
     public KhachHang updateKhachHang(int id, KhachHang updatedKH) {

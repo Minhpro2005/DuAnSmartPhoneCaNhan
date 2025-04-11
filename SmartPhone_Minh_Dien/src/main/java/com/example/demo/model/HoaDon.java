@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "HoaDon")
@@ -22,7 +23,7 @@ public class HoaDon {
 
     @ManyToOne
     @JoinColumn(name = "maKH", nullable = false)
-    @JsonBackReference
+    @JsonIgnoreProperties("hoaDons") // tránh vòng lặp vô hạn
     private KhachHang khachHang;
 
 

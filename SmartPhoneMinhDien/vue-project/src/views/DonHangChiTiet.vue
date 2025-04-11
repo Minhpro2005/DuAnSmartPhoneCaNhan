@@ -1,4 +1,5 @@
 <template>
+  
   <div class="container py-3">
     <h3>Chi tiết đơn hàng #{{ $route.params.id }}</h3>
     <table class="table table-bordered">
@@ -14,7 +15,7 @@
       <tbody>
         <tr v-for="ct in chiTiet" :key="ct.id">
           <td>{{ ct.sanPham?.tenSP }}</td>
-          <td>{{ ct.sanPham?.mauSac }}</td>
+          <td>{{ ct.bienThe?.mauSac || ct.sanPham?.mauSac }}</td>
           <td>{{ ct.soLuong }}</td>
           <td>{{ ct.giaBan.toLocaleString('vi-VN') }}đ</td>
           <td>{{ (ct.giaBan * ct.soLuong).toLocaleString('vi-VN') }}đ</td>

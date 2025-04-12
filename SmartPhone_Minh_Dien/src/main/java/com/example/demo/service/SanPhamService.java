@@ -24,8 +24,11 @@ public class SanPhamService {
         return sanPhamRepository.findById(id);
     }
 
-    // ✅ Thêm mới sản phẩm
+ // ✅ Thêm mới sản phẩm
     public SanPham create(SanPham sp) {
+        if (sp.getSoLuong() <= 0) {
+            sp.setTrangThai(false); // Tự động ngừng bán nếu hết hàng
+        }
         return sanPhamRepository.save(sp);
     }
 
@@ -41,11 +44,19 @@ public class SanPhamService {
             existing.setSoLuong(updated.getSoLuong());
             existing.setGiaBan(updated.getGiaBan());
             existing.setHinhAnhSP(updated.getHinhAnhSP());
-            existing.setTrangThai(updated.isTrangThai());
+
+            // ✅ Nếu số lượng <= 0 thì luôn đặt trạng thái là ngừng bán
+            if (updated.getSoLuong() <= 0) {
+                existing.setTrangThai(false);
+            } else {
+                existing.setTrangThai(updated.isTrangThai()); // Nếu còn hàng, giữ theo input
+            }
+
             return sanPhamRepository.save(existing);
         }
         return null;
     }
+
 
     // ✅ Xoá sản phẩm
     public void delete(int id) {

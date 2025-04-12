@@ -195,33 +195,52 @@ export default {
       this.$router.push(`/admin/bienthe/${product.maSP}`);
     },
     async handleSubmit() {
-      const method = this.isEditing ? 'PUT' : 'POST';
-      const url = this.isEditing
-        ? `http://localhost:8080/smartphone/sanpham/id/${this.newProduct.maSP}`
-        : 'http://localhost:8080/smartphone/sanpham';
+  try {
+    const method = this.isEditing ? 'PUT' : 'POST';
+    const url = this.isEditing
+      ? `http://localhost:8080/smartphone/sanpham/id/${this.newProduct.maSP}`
+      : 'http://localhost:8080/smartphone/sanpham';
 
-      try {
-        const res = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.newProduct)
-        });
+    const productData = { ...this.newProduct };
 
-        if (!res.ok) throw new Error("Lỗi khi gửi dữ liệu");
+    // ✅ Tự động cập nhật trạng thái nếu số lượng = 0
+    if (productData.soLuong <= 0) {
+      productData.trangThai = false;
+    }
 
-        const savedProduct = await res.json();
-        const index = this.products.findIndex(p => p.maSP === savedProduct.maSP);
-        if (index !== -1) this.products.splice(index, 1, savedProduct);
-        else this.products.push(savedProduct);
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData)
+    });
 
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('addProductModal')).hide();
-        this.showToast(this.isEditing ? 'Cập nhật thành công!' : 'Thêm sản phẩm thành công!');
-        this.resetForm();
-      } catch (err) {
-        console.error(err);
-        this.showToast('Đã xảy ra lỗi khi lưu sản phẩm!', 'danger');
-      }
-    },
+    if (!res.ok) throw new Error("Lỗi khi gửi dữ liệu");
+
+    const savedProduct = await res.json();
+    const index = this.products.findIndex(p => p.maSP === savedProduct.maSP);
+
+    if (index !== -1) {
+      this.products.splice(index, 1, savedProduct);
+    } else {
+      this.products.push(savedProduct);
+    }
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('addProductModal')).hide();
+
+    // ✅ Cảnh báo nếu sản phẩm bị ngừng bán do hết hàng
+    if (productData.soLuong <= 0 && productData.trangThai === false) {
+      this.showToast('⚠ Số lượng bằng 0 - Sản phẩm tự động ngừng bán', 'warning');
+    } else {
+      this.showToast(this.isEditing ? 'Cập nhật thành công!' : 'Thêm sản phẩm thành công!');
+    }
+
+    this.resetForm();
+  } catch (err) {
+    console.error(err);
+    this.showToast('Đã xảy ra lỗi khi lưu sản phẩm!', 'danger');
+  }
+},
+
     handleDelete(id) {
       if (confirm('Xác nhận xóa?')) {
         fetch(`http://localhost:8080/smartphone/sanpham/id/${id}`, { method: 'DELETE' })

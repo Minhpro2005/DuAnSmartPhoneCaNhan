@@ -10,7 +10,6 @@ import Cart from '@/views/Cart.vue'
 import BienTheSanPham from '@/views/BienTheSanPham.vue'
 import AdminLayout from '@/views/AdminLayout.vue'
 
-// 🔥 THÊM MỚI
 import KhachHangAdmin from '@/views/KhachHangAdmin.vue'
 import LichSuMuaHang from '@/views/LichSuMuaHang.vue'
 import Register from '@/views/Register.vue'
@@ -27,135 +26,60 @@ import HoaDonChiTiet from '@/views/HoaDonChiTiet.vue'
 import ThongTinNhanVien from '@/views/ThongTinNhanVien.vue'
 
 const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: Home
-  },
-  {
-    path: '/dangnhap/:id',
-    name: 'Login',
-    component: Login,
-    props: true
-  },
-  {
-    path: '/register', // 🔥 THÊM MỚI
-    name: 'Register',
-    component: Register
-  },
-  {
-    path: '/thongtincanhan/:id',
-    name: 'ThongTinCaNhan',
-    component: ThongTinCaNhan,
-    props: true
-  },
-  
-  {
-    path: '/giohang',
-    name: 'Cart',
-    component: Cart
-  },
-  {
-    path: '/sanpham/:id',
-    name: 'ProductDetail',
-    component: ProductDetail,
-    props: true
-  },
-  {
-    path: '/dathang/:id',
-    name: 'DatHang',
-    component: DatHang,
-    props: true
-  },  
-  {
-    path: '/hoadon/:id',
-    name: 'HoaDon',
-    component: HoaDon,
-    props: true
-  },  
+  { path: '/', name: 'home', component: Home },
+  { path: '/dangnhap/:id?', name: 'Login', component: Login, props: true },
+  { path: '/register', name: 'Register', component: Register },
+  { path: '/thongtincanhan/:id', name: 'ThongTinCaNhan', component: ThongTinCaNhan, props: true },
+  { path: '/giohang', name: 'Cart', component: Cart },
+  { path: '/sanpham/:id', name: 'ProductDetail', component: ProductDetail, props: true },
+  { path: '/dathang/:id', name: 'DatHang', component: DatHang, props: true },
+  { path: '/hoadon/:id', name: 'HoaDon', component: HoaDon, props: true },
+
   {
     path: '/admin',
     component: AdminLayout,
     children: [
-      {
-        path: 'thongtinnhanvien',
-        name: 'ThongTinNhanVien',
-        component: ThongTinNhanVien
-      },
-      {
-        path: '',
-        name: 'AdminProduct',
-        component: AdminProduct
-      },
-      {
-        path: 'users',
-        name: 'UserAdmin',
-        component: UserAdmin
-      },
-      {
-        path: 'khachhang', // 🔥 THÊM
-        name: 'KhachHangAdmin',
-        component: KhachHangAdmin
-      },
-      {
-        path: 'nhanvien', // 🔥 THÊM
-        name: 'StaffAdmin',
-        component: StaffAdmin
-      },
-      {
-        path: 'lichsu/:id', // 🔥 THÊM
-        name: 'LichSuMuaHang',
-        component: LichSuMuaHang,
-        props: true
-      },
-      {
-        path: 'bienthe/:maSP',
-        name: 'BienThe',
-        component: BienTheSanPham,
-        props: true
-      },
-      {
-        path: 'donhang',
-        name: 'DonHangAdmin',
-        component: DonHangAdmin
-      },
-      {
-        path: 'donhang/:id',
-        name: 'DonHangChiTiet',
-        component: DonHangChiTiet,
-        props: true
-      },
-      {
-        path: 'giohang',
-        name: 'GioHangAdmin',
-        component: GioHangAdmin,
-        props: true
-      },
-      {
-        path: 'giohang/:maGioHang',
-        name: 'ChiTietGioHang',
-        component: (ChiTietGioHang) ,
-        props: true
-      },
-      {
-        path: 'hoadon',
-        name: 'HoaDonAdmin',
-        component: HoaDonAdmin
-      },
-      {
-        path: 'hoadon/:id',
-        name: 'HoaDonChiTiet',
-        component: HoaDonChiTiet,
-        props: true
-      }
+      { path: '', name: 'AdminProduct', component: AdminProduct },
+      { path: 'users', name: 'UserAdmin', component: UserAdmin },
+      { path: 'khachhang', name: 'KhachHangAdmin', component: KhachHangAdmin },
+      { path: 'nhanvien', name: 'StaffAdmin', component: StaffAdmin },
+      { path: 'lichsu/:id', name: 'LichSuMuaHang', component: LichSuMuaHang, props: true },
+      { path: 'bienthe/:maSP', name: 'BienThe', component: BienTheSanPham, props: true },
+      { path: 'donhang', name: 'DonHangAdmin', component: DonHangAdmin },
+      { path: 'donhang/:id', name: 'DonHangChiTiet', component: DonHangChiTiet, props: true },
+      { path: 'giohang', name: 'GioHangAdmin', component: GioHangAdmin, props: true },
+      { path: 'giohang/:maGioHang', name: 'ChiTietGioHang', component: ChiTietGioHang, props: true },
+      { path: 'hoadon', name: 'HoaDonAdmin', component: HoaDonAdmin },
+      { path: 'hoadon/:id', name: 'HoaDonChiTiet', component: HoaDonChiTiet, props: true },
+      { path: 'thongtinnhanvien', name: 'ThongTinNhanVien', component: ThongTinNhanVien }
     ]
   }
 ]
-
 
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
 
-export default router
+// ✅ Bảo vệ route admin
+router.beforeEach((to, from, next) => {
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  // Chặn khách truy cập /admin nếu không phải admin/nhân viên
+  if (to.path.startsWith('/admin')) {
+    if (!user || user.vaiTro === 3) {
+      alert('🚫 Bạn không có quyền truy cập trang quản trị');
+      return next('/');
+    }
+  }
+
+  // Nếu đã đăng nhập thì không cho vào lại /dangnhap
+  if (to.name === 'Login' && user) {
+    if (user.vaiTro === 1 || user.vaiTro === 2) return next('/admin');
+    if (user.vaiTro === 3) return next('/');
+  }
+
+  next();
+});
+
+export default router;

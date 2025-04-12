@@ -38,7 +38,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="dh in filteredDonHangs" :key="dh.maDonHang">
+        <tr v-for="dh in paginatedDonHangs" :key="dh.maDonHang">
           <td>{{ dh.maDonHang }}</td>
           <td>{{ dh.khachHang?.maKH }}</td>
           <td>{{ dh.sdtGiaoHang }}</td>
@@ -56,20 +56,32 @@
             </select>
           </td>
           <td class="d-flex gap-1">
-            <router-link :to="`/admin/donhang/${dh.maDonHang}`" class="btn btn-sm btn-info">
-              Chi tiết
-            </router-link>
+            <router-link :to="`/admin/donhang/${dh.maDonHang}`" class="btn btn-sm btn-info">Chi tiết</router-link>
             <button
               class="btn btn-sm btn-success"
               v-if="dh.trangThai === 'Chờ xử lý'"
-              @click="xacNhanDonHang(dh.maDonHang)"
-            >
+              @click="xacNhanDonHang(dh.maDonHang)">
               Xác nhận
             </button>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <!-- Phân trang -->
+    <nav v-if="totalPages > 1">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+          <button class="page-link" @click="goToPage(currentPage - 1)">Trước</button>
+        </li>
+        <li class="page-item" v-for="n in totalPages" :key="n" :class="{ active: currentPage === n }">
+          <button class="page-link" @click="goToPage(n)">{{ n }}</button>
+        </li>
+        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+          <button class="page-link" @click="goToPage(currentPage + 1)">Sau</button>
+        </li>
+      </ul>
+    </nav>
   </div>
 </template>
 
@@ -81,7 +93,9 @@ export default {
       donHangs: [],
       searchMaDH: '',
       fromDate: '',
-      filterTrangThai: ''
+      filterTrangThai: '',
+      currentPage: 1,
+      pageSize: 20
     };
   },
   computed: {
@@ -92,6 +106,13 @@ export default {
         const matchTrangThai = !this.filterTrangThai || dh.trangThai === this.filterTrangThai;
         return matchMa && matchDate && matchTrangThai;
       });
+    },
+    paginatedDonHangs() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      return this.filteredDonHangs.slice(start, start + this.pageSize);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredDonHangs.length / this.pageSize);
     }
   },
   methods: {
@@ -116,22 +137,24 @@ export default {
         .catch(() => alert('❌ Lỗi khi cập nhật trạng thái!'));
     },
     xacNhanDonHang(maDonHang) {
-  fetch(`http://localhost:8080/smartphone/donhang/xacnhan/${maDonHang}`, {
-    method: 'PUT'
-  })
-    .then(async res => {
-      const msg = await res.text();
-      if (!res.ok) throw new Error(msg);
-      alert('✅ ' + msg);
-
-      this.fetchDonHangs(); // <-- 📍 CHÍNH Ở ĐÂY
-    })
-    .catch(err => {
-      alert('❌ Lỗi xác nhận đơn hàng:\n' + err.message);
-    });
-}
-
-
+      fetch(`http://localhost:8080/smartphone/donhang/xacnhan/${maDonHang}`, {
+        method: 'PUT'
+      })
+        .then(async res => {
+          const msg = await res.text();
+          if (!res.ok) throw new Error(msg);
+          alert('✅ ' + msg);
+          this.fetchDonHangs();
+        })
+        .catch(err => {
+          alert('❌ Lỗi xác nhận đơn hàng:\n' + err.message);
+        });
+    },
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    }
   },
   mounted() {
     this.fetchDonHangs();

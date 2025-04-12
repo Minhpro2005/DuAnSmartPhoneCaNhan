@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +43,16 @@ public class DonHangService {
     public DonHang create(DonHang donHang) {
         return donHangRepository.save(donHang);
     }
+    
+    public List<DonHang> getByUserId(int userId) {
+        return donHangRepository.findByKhachHang_User_UserID(userId);
+    }
+    
+    public List<DonHang> getByUserIdAndFilters(int userId, Date start, Date end, String trangThai) {
+        return donHangRepository.findByKhachHang_User_UserIDAndNgayDatBetweenAndTrangThai(userId, start, end, trangThai);
+    }
+
+
 
     public DonHang update(int id, DonHang updated) {
         Optional<DonHang> existingOpt = donHangRepository.findById(id);

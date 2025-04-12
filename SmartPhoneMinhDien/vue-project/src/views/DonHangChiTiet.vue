@@ -1,10 +1,10 @@
 <template>
-  
   <div class="container py-3">
     <h3>Chi tiết đơn hàng #{{ $route.params.id }}</h3>
-    <table class="table table-bordered">
-      <thead>
+    <table class="table table-bordered align-middle text-center">
+      <thead class="table-light">
         <tr>
+          <th>Hình ảnh</th>
           <th>Sản phẩm</th>
           <th>Màu sắc</th>
           <th>Số lượng</th>
@@ -14,8 +14,19 @@
       </thead>
       <tbody>
         <tr v-for="ct in chiTiet" :key="ct.id">
-          <td>{{ ct.sanPham?.tenSP }}</td>
-          <td>{{ ct.bienThe?.mauSac || ct.sanPham?.mauSac }}</td>
+          <!-- ✅ Hiển thị hình ảnh -->
+          <td>
+            <img
+              :src="ct.bienTheSanPham?.hinhAnh || ct.sanPham?.hinhAnhSP"
+              alt="ảnh"
+              width="70"
+              class="rounded shadow"
+            />
+          </td>
+          <!-- ✅ Tên sản phẩm -->
+          <td>{{ ct.bienTheSanPham?.sanPham?.tenSP || ct.sanPham?.tenSP }}</td>
+          <!-- ✅ Màu sắc -->
+          <td>{{ ct.bienTheSanPham?.mauSac || ct.sanPham?.mauSac }}</td>
           <td>{{ ct.soLuong }}</td>
           <td>{{ ct.giaBan.toLocaleString('vi-VN') }}đ</td>
           <td>{{ (ct.giaBan * ct.soLuong).toLocaleString('vi-VN') }}đ</td>
@@ -24,6 +35,7 @@
     </table>
   </div>
 </template>
+
 
 <script>
 export default {

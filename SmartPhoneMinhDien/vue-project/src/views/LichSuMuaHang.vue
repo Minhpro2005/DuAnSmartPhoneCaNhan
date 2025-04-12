@@ -11,16 +11,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in orders" :key="order.id">
-            <td>{{ order.id }}</td>
-            <td>{{ formatDate(order.ngayMua) }}</td>
-            <td>{{ formatVND(order.tongTien) }}</td>
-            <td>
-              <span :class="order.trangThai === 'Đã giao' ? 'text-success' : 'text-warning'">
-                {{ order.trangThai }}
-              </span>
-            </td>
-          </tr>
+          <tr v-for="order in orders" :key="order.maDonHang">
+  <td>{{ order.maDonHang }}</td>
+  <td>{{ formatDate(order.ngayDat) }}</td>
+  <td>{{ formatVND(order.tongTien) }}</td>
+  <td>
+    <span :class="order.trangThai === 'Đã giao' ? 'text-success' : 'text-warning'">
+      {{ order.trangThai }}
+    </span>
+  </td>
+</tr>
+
         </tbody>
       </table>
     </div>

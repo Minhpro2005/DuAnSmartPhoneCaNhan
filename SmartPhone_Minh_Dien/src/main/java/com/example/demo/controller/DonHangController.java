@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +35,38 @@ public class DonHangController {
         Optional<DonHang> dh = donHangService.getById(id);
         return dh.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<DonHang>> getByUserIdAndFilters(
+            @PathVariable int userId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String status) {
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            Date start = (startDate != null) ? sdf.parse(startDate) : new Date(0); // từ năm 1970
+            Date end = (endDate != null) ? sdf.parse(endDate) : new Date();        // hiện tại
+
+            if (status != null && !status.isBlank()) {
+                return ResponseEntity.ok(donHangService.getByUserIdAndFilters(userId, start, end, status));
+            } else {
+                // Nếu không có status thì chỉ lọc theo ngày
+                List<DonHang> all = donHangService.getByUserId(userId);
+                return ResponseEntity.ok(
+                    all.stream()
+                       .filter(dh -> !dh.getNgayDat().before(start) && !dh.getNgayDat().after(end))
+                       .toList()
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
 
     // ✅ Thêm đơn hàng
     @PostMapping

@@ -5,6 +5,7 @@ import com.example.demo.model.KhachHang;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -18,4 +19,11 @@ public interface DonHangRepository extends JpaRepository<DonHang, Integer> {
 
     // ✅ Tìm đơn hàng theo khách hàng và trạng thái
     List<DonHang> findByKhachHangAndTrangThai(KhachHang khachHang, String trangThai);
+    
+    List<DonHang> findByKhachHang_User_UserID(int userID);
+    
+
+    List<DonHang> findByKhachHang_User_UserIDAndNgayDatBetweenAndTrangThai(
+    int userId, Date startDate, Date endDate, String trangThai);
+
 }

@@ -3,7 +3,6 @@
     <div class="row">
       <!-- Sidebar -->
       <nav class="col-md-2 bg-dark text-white p-3 min-vh-100">
-        <!-- Avatar + tên người dùng -->
         <div class="text-center mb-4">
           <img
             :src="user?.avatar ? 'http://localhost:8080' + user.avatar : defaultAvatar"
@@ -61,11 +60,13 @@
           </li>
 
           <li class="nav-item">
-            <router-link to="/admin/thongtinnhanvien" class="nav-link text-white"
-  :class="{ 'fw-bold': $route.path === '/admin/thongtinnhanvien' }">
-  Thông tin cá nhân
-</router-link>
+            <router-link to="/admin/thongtinnhanvien" class="nav-link text-white" :class="{ 'fw-bold': $route.path === '/admin/thongtinnhanvien' }">
+              Thông tin cá nhân
+            </router-link>
+          </li>
 
+          <li class="nav-item mt-3">
+            <button class="btn btn-outline-light w-100" @click="logout">Đăng xuất</button>
           </li>
         </ul>
       </nav>
@@ -99,11 +100,21 @@ export default {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       this.user = JSON.parse(storedUser);
+
+      // ✅ Chặn khách hàng (vaiTro === 3) vào trang admin
+      if (this.user.vaiTro === 3) {
+        alert('🚫 Bạn không có quyền truy cập trang quản trị');
+        this.$router.push('/');
+      }
     } else {
       this.$router.push('/dangnhap');
     }
   },
   methods: {
+    logout() {
+      localStorage.removeItem('user');
+      this.$router.push('/dangnhap');
+    },
     getRoleName(vaiTro) {
       if (vaiTro === 1) return 'Quản trị viên';
       if (vaiTro === 2) return 'Nhân viên';

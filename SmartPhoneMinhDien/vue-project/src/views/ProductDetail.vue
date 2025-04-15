@@ -43,11 +43,24 @@
       </div>
     </div>
   </div>
+
+  <!-- ✅ Toast Thông báo -->
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+    <div class="toast align-items-center text-white" :class="toastType === 'success' ? 'bg-success' : 'bg-danger'" role="alert" :id="'mainToast'" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ toastMessage }}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, RouterLink } from 'vue-router';
+import * as bootstrap from 'bootstrap';
 
 const route = useRoute();
 const product = ref({});
@@ -55,6 +68,19 @@ const variants = ref([]);
 const selectedVariant = ref(null);
 const quantity = ref(1);
 const placeholderImg = 'https://placehold.co/400x300?text=No+Image';
+
+// Toast state
+const toastMessage = ref('');
+const toastType = ref('success'); // success | error
+
+const showToast = (message, type = 'success') => {
+  toastMessage.value = message;
+  toastType.value = type;
+
+  const toastEl = document.getElementById('mainToast');
+  const toast = new bootstrap.Toast(toastEl);
+  toast.show();
+};
 
 const fetchProduct = async () => {
   const res = await fetch(`http://localhost:8080/smartphone/sanpham/id/${route.params.id}`);
@@ -66,7 +92,9 @@ const fetchVariants = async () => {
   variants.value = await res.json();
 };
 
-const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+const formatPrice = (price) =>
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+
 const increaseQty = () => {
   if (quantity.value < (selectedVariant.value?.soLuong || product.value.soLuong)) quantity.value++;
 };
@@ -82,14 +110,12 @@ const addToCart = async () => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user || !user.userID) {
-      alert("Vui lòng đăng nhập trước khi thêm vào giỏ hàng.");
+      showToast('Vui lòng đăng nhập trước khi thêm vào giỏ hàng!', 'error');
       return;
     }
 
-    // ✅ Đã sửa: Đổi sang API lấy thông tin khách hàng
     const resKH = await fetch(`http://localhost:8080/smartphone/khachhang/user/${user.userID}`);
     if (!resKH.ok) throw new Error("Không tìm thấy thông tin khách hàng");
-
     const khachHang = await resKH.json();
     const maKH = khachHang.maKH;
 
@@ -97,9 +123,8 @@ const addToCart = async () => {
     let gioHangList = gioHangRes.ok ? await gioHangRes.json() : [];
     let gioHang = gioHangList.length ? gioHangList[0] : null;
 
-    // ✅ Tạo giỏ hàng mới nếu chưa có
     if (!gioHang) {
-      const now = new Date().toISOString().split('T')[0]; // yyyy-MM-dd
+      const now = new Date().toISOString().split('T')[0];
       const createRes = await fetch(`http://localhost:8080/smartphone/giohang`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -113,7 +138,6 @@ const addToCart = async () => {
       gioHang = await createRes.json();
     }
 
-    // 🔍 Kiểm tra sản phẩm đã có trong giỏ chưa
     const chiTietRes = await fetch(`http://localhost:8080/smartphone/giohangchitiet/giohang/${gioHang.maGioHang}`);
     const chiTietList = await chiTietRes.json();
 
@@ -123,7 +147,6 @@ const addToCart = async () => {
     );
 
     if (existingItem) {
-      // ✅ Cập nhật số lượng nếu đã tồn tại
       const updatedSoLuong = existingItem.soLuong + quantity.value;
       await fetch(`http://localhost:8080/smartphone/giohangchitiet/id/${existingItem.id}`, {
         method: "PUT",
@@ -139,7 +162,6 @@ const addToCart = async () => {
         })
       });
     } else {
-      // ✅ Thêm sản phẩm mới vào giỏ hàng
       await fetch(`http://localhost:8080/smartphone/giohangchitiet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -154,11 +176,11 @@ const addToCart = async () => {
       });
     }
 
-    alert("✅ Sản phẩm đã được thêm vào giỏ hàng!");
+    showToast('✅ Sản phẩm đã được thêm vào giỏ hàng!', 'success');
 
   } catch (error) {
     console.error("❌ Lỗi khi thêm giỏ hàng:", error);
-    alert("Thêm vào giỏ hàng thất bại!");
+    showToast('Thêm vào giỏ hàng thất bại!', 'error');
   }
 };
 
@@ -174,26 +196,62 @@ img {
   object-fit: contain;
   background: #f9f9f9;
   padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 .variant-card {
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: 2px solid #dee2e6;
+  border-radius: 12px;
   padding: 10px;
   width: 120px;
   text-align: center;
   cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(to bottom right, #fff, #f8f9fa);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
+
+.variant-card:hover {
+  transform: scale(1.03);
+  border-color: #007bff;
+}
+
 .variant-card.active {
-  border: 2px solid red;
+  border: 2px solid #007bff;
+  background: #e7f1ff;
 }
+
 .variant-card img {
   width: 100%;
   height: 80px;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: 8px;
 }
+
 .variant-name {
-  margin-top: 5px;
+  margin-top: 6px;
   font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.input-group {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+h2, h4, p {
+  color: #333;
 }
 </style>
